@@ -316,6 +316,43 @@ test_that("data and data2 can share column names", {
   expect_identical(out$Parameter2, rep(paste0("x.1.", lv), 3))
 })
 
+test_that("polychoric correlation() matches polycor for numeric and ordered variables", {
+  skip_if_not_or_load_if_installed("psych")
+  skip_if_not_or_load_if_installed("polycor")
+
+  # one numeric and one ordered variable (#261)
+  set.seed(2024)
+  d2 <- data.frame(
+    o = factor(sample(LETTERS[1:4], 100, TRUE), ordered = TRUE),
+    x = rnorm(100)
+  )
+  out <- suppressWarnings(correlation(d2, method = "polychoric"))
+  expect_identical(out$Method, "Polyserial correlation")
+  expect_equal(out$rho, polycor::polyserial(d2$x, d2$o), tolerance = 1e-6)
+
+  # with more variables, the coefficients are not partial correlations
+  set.seed(3)
+  n <- 200
+  z <- rnorm(n)
+  d3 <- data.frame(
+    x = z + rnorm(n),
+    o1 = cut(z + rnorm(n), 4, ordered_result = TRUE),
+    o2 = cut(z + rnorm(n), 3, ordered_result = TRUE)
+  )
+  out <- correlation(d3, method = "polychoric")
+  expect_identical(out$Parameter1, c("x", "x", "o1"))
+  expect_identical(out$Parameter2, c("o1", "o2", "o2"))
+  expect_equal(
+    out$rho,
+    c(
+      polycor::polyserial(d3$x, d3$o1),
+      polycor::polyserial(d3$x, d3$o2),
+      polycor::polychor(d3$o1, d3$o2)
+    ),
+    tolerance = 1e-3
+  )
+})
+
 test_that("correlation doesn't fail when BFs are NA", {
   skip_if_not_or_load_if_installed("ggplot2")
   skip_if_not_or_load_if_installed("BayesFactor")
@@ -421,4 +458,37 @@ test_that("biserial correlations keep the multilevel grouping factor", {
     )
     expect_equal(with_factors$rho, ref$rho, tolerance = 1e-10)
   }
+})
+
+
+test_that("ordered factors are converted to ranks, not dummy-coded", {
+  set.seed(1337)
+  df <- data.frame(
+    a = sample(1:5, 10, replace = TRUE),
+    b = factor(
+      sample(c("s", "m", "l"), 10, replace = TRUE),
+      levels = c("s", "m", "l"),
+      ordered = TRUE
+    ),
+    c = rnorm(10)
+  )
+
+  out <- correlation(df, method = "spearman", include_factors = TRUE)
+  expect_identical(
+    paste(out$Parameter1, out$Parameter2),
+    c("a b", "a c", "b c")
+  )
+
+  ct <- cor_test(df, "a", "b", method = "spearman")
+  expect_equal(out$rho[1], ct$rho, tolerance = 1e-10)
+  expect_equal(
+    out$rho[1],
+    stats::cor(df$a, as.integer(df$b), method = "spearman"),
+    tolerance = 1e-10
+  )
+
+  # unordered factors are still dummy-coded
+  df$b <- factor(df$b, ordered = FALSE)
+  out <- correlation(df, method = "spearman", include_factors = TRUE)
+  expect_true(all(c("b.s", "b.m", "b.l") %in% out$Parameter1))
 })
