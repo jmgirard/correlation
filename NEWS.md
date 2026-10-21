@@ -43,13 +43,11 @@
   variable. Each pair now gets the same polyserial or polychoric correlation as
   `cor_test()` (#261).
 
-- If `data2` or `select2` contains a factor and `include_factors = TRUE`,
-  `correlation()` now returns the correlations with the dummy variables of that
-  factor. Previously, it returned no rows for that factor (#277, #292).
+- Fixed `correlation()` dropping factors in `data2` or `select2` when
+  `include_factors = TRUE` (#277, #292).
 
-- If `data` and `data2` share a column name, `correlation()` now renames the
-  column in `data2` (for example, `x` to `x.1`) and returns all pairs across
-  the two sets. Previously, it dropped or mislabeled the pairs for that column.
+- Fixed `correlation()` dropping or mislabeling pairs when `data` and `data2`
+  share a column name. The column in `data2` is now renamed (e.g. `x.1`).
 
 # correlation 0.8.8
 
