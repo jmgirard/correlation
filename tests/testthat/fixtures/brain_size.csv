@@ -4,7 +4,7 @@
 # https://scipy-lectures.org/_downloads/brain_size.csv (the row-index column dropped,
 # "." read as NA; no other change). Read with read.csv(comment.char = "#").
 # Rows with FSIQ >= 130 (20 of them) are the data of van Doorn, Ly, Marsman & Wagenmakers
-# (2018) Fig. 5, p. 307; see cairn/references/vandoorn2018.md.
+# (2018) Fig. 5, p. 307.
 Gender,FSIQ,VIQ,PIQ,Weight,Height,MRI_Count
 Female,133,132,124,118,64.5,816932
 Male,140,150,124,NA,72.5,1001121

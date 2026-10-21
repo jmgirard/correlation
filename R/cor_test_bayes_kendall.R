@@ -1,7 +1,5 @@
-# Bayesian Kendall's tau after van Doorn, Ly, Marsman & Wagenmakers (2018),
-# "Bayesian Inference for Kendall's Rank Correlation Coefficient", The American
-# Statistician 72(4), 303-308, doi:10.1080/00031305.2016.1264998. Equation
-# numbers below refer to that paper.
+# Bayesian Kendall's tau (van Doorn, Ly, Marsman & Wagenmakers, 2018).
+# Equation numbers refer to that paper.
 
 #' @keywords internal
 .cor_test_bayes_kendall <- function(
@@ -22,7 +20,7 @@
   bayesian_ci_method <- .bayes_kendall_ci_method(bayesian_ci_method)
 
   if (x == y) {
-    # Same convention as the Bayesian Pearson path for a perfect correlation
+    # as the Bayesian Pearson path does for a perfect correlation
     est <- list(
       tau = 1,
       CI_low = 1,
@@ -70,8 +68,7 @@
     stringsAsFactors = FALSE
   )
 
-  # Drop pd and ROPE_Percentage when they were not asked for; BF is always
-  # reported. Both as the Pearson row does.
+  # BF is always reported, as for the Pearson row
   tests <- tolower(bayesian_test)
   if (!"pd" %in% tests) {
     out$pd <- NULL
@@ -108,9 +105,7 @@
   alpha <- 1 / .bayes_kendall_scale(scale)
   ci_method <- .bayes_kendall_ci_method(ci_method)
 
-  # T*, eq. (6), with the numerator taken as tau * n(n - 1)/2 (the concordance
-  # count only when there are no ties), over sqrt(n(n - 1)(2n + 5)/18); both
-  # reference implementations do the same, so tied data are not tie-corrected
+  # T*, eq. (6), from tau-b (not corrected for ties)
   t_star <- tau * (n * (n - 1) / 2) / sqrt(n * (n - 1) * (2 * n + 5) / 18)
 
   # Prior on tau, eq. (9): pi * 2^(-2 alpha) / B(alpha, alpha) * cos(pi tau / 2)^(2 alpha - 1)
@@ -124,9 +119,8 @@
   }
   log_post <- function(t) log_lik(t) + log_prior(t)
 
-  # Integrate a kernel scaled by the posterior mode so peaked posteriors
-  # (large n, |tau| near 1) stay in floating-point range; every integral is
-  # split at the mode so the peak is an endpoint of the quadrature.
+  # scale by the posterior mode and split integrals at the mode, so that
+  # peaked posteriors stay in range
   mode <- stats::optimize(function(t) -log_post(t), c(-1, 1), tol = 1e-10)
   mode <- mode$minimum
   lp_max <- log_post(mode)
@@ -166,17 +160,15 @@
 
   median <- quantile(0.5)
   if (ci == 1) {
-    # The whole support; the hdi search below has no room at ci = 1
+    # the whole support
     ci_low <- -1
     ci_high <- 1
   } else if (ci_method == "eti") {
     ci_low <- quantile((1 - ci) / 2)
     ci_high <- quantile((1 + ci) / 2)
   } else {
-    # Highest-density interval: the interval of mass `ci` with the smallest
-    # width, searched over its lower end (the posterior is unimodal for
-    # alpha >= 1/2, i.e. every named prior and any scale <= 2, which
-    # .bayes_kendall_scale() enforces)
+    # hdi: the narrowest interval of mass `ci` (the posterior is unimodal for
+    # scale <= 2)
     width <- function(a) quantile(cdf(a) + ci) - a
     a_max <- quantile(1 - ci)
     ci_low <- stats::optimize(width, c(-1, a_max), tol = 1e-8)$minimum
@@ -207,8 +199,7 @@
   if (is.character(scale) && length(scale) == 1 && scale %in% names(named)) {
     return(unname(named[scale]))
   }
-  # A scale above 2 is alpha < 1/2: the prior of eq. (9) is then unbounded at
-  # tau = +-1, the quadrature can fail, and the posterior need not be unimodal
+  # above 2, the prior of eq. (9) is unbounded at tau = +-1
   if (
     is.numeric(scale) &&
       length(scale) == 1 &&

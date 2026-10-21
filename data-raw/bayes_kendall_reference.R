@@ -16,9 +16,8 @@
 #      computeKendallBCor(). The whole R/ directory is needed because kendall.R
 #      calls helpers in 0helpers.R; bstats also needs the purrr package.
 #
-# Both sources are kept on the gitignored shelf cairn/references/sources/vandoorn2018/
-# (see cairn/references/vandoorn2018.md). To regenerate the table, download the
-# files to the paths below (or set the two variables) and run:
+# To regenerate the table, download both sources, set the two environment
+# variables below to their paths, and run:
 #
 #   Rscript data-raw/bayes_kendall_reference.R
 #
@@ -26,14 +25,8 @@
 # parameter is alpha = 1/kappa, so scale 1/3 is alpha = 3 (the package's
 # "medium" prior) and scale 1 is alpha = 1 (the paper's default).
 
-osf_file <- Sys.getenv(
-  "VANDOORN_OSF",
-  "cairn/references/sources/vandoorn2018/R_Code_KendallBayesFactor.R"
-)
-bstats_dir <- Sys.getenv(
-  "VANDOORN_BSTATS",
-  "cairn/references/sources/vandoorn2018/bstats_R_42d34c1"
-)
+osf_file <- Sys.getenv("VANDOORN_OSF", "R_Code_KendallBayesFactor.R")
+bstats_dir <- Sys.getenv("VANDOORN_BSTATS", "bstats/R")
 
 # Each source in its own environment: both define priorTau() and posteriorTau()
 # with different signatures.

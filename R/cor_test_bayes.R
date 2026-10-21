@@ -10,8 +10,7 @@
   bayesian_test = c("pd", "rope", "bf"),
   ...
 ) {
-  # Kendall has its own analytic posterior (van Doorn et al. 2018) and does
-  # not use BayesFactor
+  # Kendall (van Doorn et al. 2018) does not use BayesFactor
   if (tolower(method) %in% c("kendall", "ken", "k")) {
     return(.cor_test_bayes_kendall(
       data,

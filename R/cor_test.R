@@ -36,12 +36,8 @@
 #' @param bayesian_prior For the prior argument, several named values are
 #'   recognized: `"medium.narrow"`, `"medium"`, `"wide"`, and `"ultrawide"`.
 #'   These correspond to scale values of `1/sqrt(27)`, `1/3`, `1/sqrt(3)` and
-#'   `1`, respectively. See the `BayesFactor::correlationBF` function. The
-#'   scale sets the shape parameter of the stretched beta prior on the
-#'   correlation as alpha = 1/scale; a positive number is accepted as the scale
-#'   directly. For `method = "kendall"` that prior is carried over to Kendall's
-#'   tau and a numeric scale must lie in (0, 2] (see the Notes section of
-#'   [correlation()]).
+#'   `1`, respectively. See the `BayesFactor::correlationBF` function. For
+#'   `method = "kendall"`, a numeric scale must be in (0, 2].
 #' @param bayesian_ci_method,bayesian_test See arguments in
 #'   [`parameters::model_parameters()`] for `BayesFactor` tests. For
 #'   `method = "kendall"`, `bayesian_ci_method` must be `"hdi"` or `"eti"`.
@@ -195,8 +191,7 @@ cor_test <- function(
     partial <- TRUE
   }
 
-  # The two columns; one column when x == y (a duplicated name cannot be
-  # assigned to a data frame)
+  # one column when x == y
   vars <- unique(c(x, y))
 
   # Bootstrap arguments

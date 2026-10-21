@@ -173,29 +173,15 @@
 #' }
 #'
 #' \subsection{Notes}{
-#' Spearman correlations when `bayesian=TRUE` are technically Pearson Bayesian
-#' correlations of rank-transformed data, and Gaussian-rank correlations
-#' Pearson Bayesian correlations of the normal scores of the ranks, rather than
-#' pure Bayesian rank correlations (which have different priors).
+#' Spearman correlations when `bayesian=TRUE`: These are technically Pearson
+#' Bayesian correlations of rank transformed data, rather than pure Bayesian
+#' rank correlations (which have different priors).
 #'
-#' Kendall correlations when `bayesian=TRUE` follow the model of van Doorn,
-#' Ly, Marsman and Wagenmakers (2018): the observed tau-b (as reported by
-#' `stats::cor(method = "kendall")`) is standardized to the statistic T*, whose
-#' likelihood is normal with mean 1.5 tau sqrt(n) and variance 1, and combined
-#' with the prior on tau induced by a symmetric stretched beta prior on the
-#' Pearson correlation through tau = (2/pi) asin(rho). The reported `tau` is the
-#' posterior median, the interval is the highest-density (`"hdi"`, the default)
-#' or equal-tailed (`"eti"`) interval of that posterior, and `BF` is the
-#' Savage-Dickey ratio of the prior to the posterior density at tau = 0. The
-#' `bayesian_prior` scale maps to the stretched-beta shape parameter as
-#' alpha = 1/scale (so `"medium"` is alpha = 3 and a scale of 1 is the paper's
-#' default), the same mapping `BayesFactor::correlationBF()` applies to its
-#' `rscale`; a numeric scale must lie in (0, 2] for this method, so that the
-#' prior stays bounded and the posterior unimodal. `bayesian_ci_method` must
-#' be `"hdi"` or `"eti"` for this method. T* is computed from tau-b as the
-#' authors' own code does, so ties are not corrected for: on data with many
-#' ties the Bayes factor is larger and the interval narrower than a
-#' tie-corrected statistic would give.
+#' Kendall correlations when `bayesian=TRUE` follow van Doorn et al. (2018).
+#' The prior on tau comes from a stretched beta prior on the Pearson
+#' correlation, with alpha = 1/scale (as in `BayesFactor::correlationBF()`).
+#' `tau` is the posterior median and `BF` the Savage-Dickey Bayes factor. Ties
+#' are not corrected for.
 #' }
 #'
 #' \subsection{Bootstrap confidence intervals}{
