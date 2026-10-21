@@ -43,10 +43,8 @@
   variable. Each pair now gets the same polyserial or polychoric correlation as
   `cor_test()` (#261).
 
-- `correlation()` with `multilevel = TRUE` and `partial = FALSE` now returns
-  correct correlations when two variable sets are given (`select2` or `data2`)
-  and no longer fails on grouped data. The `Method` column now keeps the
-  requested method instead of always showing "Pearson" (#207).
+- Fixed `correlation()` with `multilevel = TRUE` for `select2`, `data2`, and
+  grouped data. The `Method` column now shows the requested method (#207).
 
 # correlation 0.8.8
 

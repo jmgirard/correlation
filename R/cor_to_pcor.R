@@ -175,8 +175,7 @@ pcor_to_cor.easycorrelation <- function(
 }
 
 
-# Used by correlation() to back-convert multilevel partial correlations. It
-# needs every pair of the variables, before any split into two variable sets.
+# Revert multilevel partial correlations back to r in correlation()
 #' @keywords internal
 .pcor_to_cor_params <- function(
   params,

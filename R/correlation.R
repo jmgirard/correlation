@@ -856,8 +856,7 @@ correlation <- function(
     }
   }
 
-  # Revert partial correlations back to r if needed. This needs the full
-  # matrix, so it happens before the variable sets are split.
+  # Revert back to r if needed (before the variable sets are split)
   if (convert_back_to_r) {
     params <- .pcor_to_cor_params(params, ci = ci, method = method)
   }
