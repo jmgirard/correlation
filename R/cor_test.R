@@ -189,10 +189,7 @@ cor_test <- function(
     partial <- TRUE
   }
 
-  # "auto" with an ordered factor of three or more levels: polychoric (or
-  # polyserial), which needs the factors, so pick it before they are converted
-  # (not for partial correlations, nor when the other variable is an unordered
-  # factor or text)
+  # "auto" with ordered factors: pick polychoric before factors are converted
   if (
     tolower(method) == "auto" &&
       !bayesian &&

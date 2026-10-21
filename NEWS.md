@@ -43,11 +43,8 @@
   variable. Each pair now gets the same polyserial or polychoric correlation as
   `cor_test()` (#261).
 
-- With `method = "auto"`, `cor_test()` and `correlation()` now use a
-  polychoric correlation for two ordered factors with three or more levels.
-  For one such factor and a numeric variable, they use a polyserial
-  correlation. Previously, they converted the factors to numbers and used a
-  Pearson correlation (#260).
+- `method = "auto"` now selects a polychoric (or polyserial) correlation for
+  ordered factors with three or more levels, instead of Pearson (#260).
 
 # correlation 0.8.8
 
