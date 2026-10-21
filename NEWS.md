@@ -43,9 +43,8 @@
   variable. Each pair now gets the same polyserial or polychoric correlation as
   `cor_test()` (#261).
 
-- Subsetting the rows or columns of a correlation matrix from `summary()` now
-  keeps its p-values, intervals, and other attributes, so the subset still
-  prints with significance stars and the table footer (#26).
+- Subsetting a correlation matrix from `summary()` now keeps its attributes, so
+  significance stars are still shown (#26).
 
 # correlation 0.8.8
 
