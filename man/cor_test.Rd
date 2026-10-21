@@ -153,12 +153,9 @@ all possible pairwise events. Confidence Intervals (CI) for Kendall's
 correlations are computed using the Fieller et al. (1957) correction (see
 Bishara and Hittner, 2017).
 
-The \emph{p}-values for Spearman's and Kendall's correlations are asymptotic
-approximations (\code{exact = FALSE} in \code{\link[stats:cor.test]{stats::cor.test()}}), so ties in the
-data do not cause a warning. Pass \code{exact = TRUE} to get exact \emph{p}-values
-for small samples without ties. For large samples with strong
-correlations, a \emph{p}-value can be smaller than the smallest number that R
-can store, and is then reported as exactly 0.
+The p-values for Spearman's and Kendall's correlations are asymptotic
+(\code{exact = FALSE} in \code{\link[stats:cor.test]{stats::cor.test()}}); use \code{exact = TRUE} for exact
+p-values. Very small p-values may be reported as 0.
 \item \strong{Biweight midcorrelation}: A measure of similarity that is
 median-based, instead of the traditional mean-based, thus being less
 sensitive to outliers. It can be used as a robust alternative to other
