@@ -8,8 +8,11 @@
   if (!multilevel) {
     if (include_factors) {
       # with `keep_ordinal`, ordered factors of three or more levels stay
-      # factors (for `method = "auto"`); other factors are dummy-coded
+      # factors (for `method = "auto"`); other ordered factors become their
+      # level ranks, as in `cor_test()`; unordered factors are dummy-coded
       keep <- keep_ordinal & vapply(data, .is_ordinal, logical(1))
+      ordered_cols <- vapply(data, is.ordered, logical(1)) & !keep
+      data[ordered_cols] <- lapply(data[ordered_cols], as.integer)
       if (any(keep)) {
         data <- do.call(
           cbind,
