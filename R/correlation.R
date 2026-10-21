@@ -215,24 +215,10 @@
 #' `winsorize` and `ranktransform` transformations are applied once, to the
 #' full data, before resampling.
 #'
-#' With `partial = TRUE`, each resample repeats the steps of the point
-#' estimate on the resampled raw rows, in this order: the two variables are
-#' partialled on the other variables again (the `cluster` column is never one
-#' of them), then winsorized (`winsorize`), then rank transformed
-#' (`ranktransform`), and then the coefficient is computed. The rows
-#' resampled are those that change the point estimate: the rows that enter
-#' one of the two regressions of the partial step or the coefficient. So a
-#' row with a missing value in one of the two variables is kept, and a row
-#' with a missing covariate, a missing value in both variables, or a missing
-#' `cluster` value is dropped. With the polychoric or tetrachoric method, a
-#' factor variable (polychoric also turns two numeric variables into factors)
-#' is not partialled, so it needs no covariate. With `cluster`, a cluster
-#' with no such row is not resampled, and the warning below 20 clusters
-#' counts only the clusters with a row that enters the coefficient. The
-#' coefficient of each resample leaves out its incomplete rows as the point
-#' estimate does. Because each replicate refits
-#' the regressions on the other variables, a partial bootstrap is slower than
-#' a bootstrap without `partial`.
+#' With `partial = TRUE`, each resample is partialled again (the `cluster`
+#' column is never a covariate), then winsorized and rank transformed if
+#' requested. Rows that enter neither the regressions nor the coefficient are
+#' not resampled. This is slower than a bootstrap without `partial`.
 #'
 #' The cluster bootstrap (`cluster`) resamples whole clusters, so the
 #' dependence within a cluster (repeated measures of one participant, say)

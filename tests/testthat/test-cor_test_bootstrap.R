@@ -395,7 +395,7 @@ for (spec in method_sweep) {
 
 # AC4: argument errors and warnings ----------------------------------------------
 
-test_that("AC4: bootstrap is refused for Bayesian and multilevel correlations", {
+test_that("bootstrap is refused for Bayesian and multilevel correlations", {
   expect_error(
     cor_test(
       iris,

@@ -53,12 +53,12 @@
 #' @param bootstrap If `TRUE`, the confidence interval, standard error, and
 #'   p-value are obtained from a nonparametric percentile bootstrap instead of
 #'   the analytic formulas: rows are resampled with replacement `iterations`
-#'   times and the coefficient is recomputed on each resample. With
-#'   `partial = TRUE`, each resample is partialled again, then winsorized and
-#'   rank transformed if requested. See the 'Bootstrap' section. Not available
-#'   for Bayesian, full Bayesian partial (`partial_bayesian`), or multilevel
-#'   correlations; the interval and p-value are two-sided, so `alternative`
-#'   (passed through `...`) must be `"two.sided"`, the default.
+#'   times and the coefficient is recomputed on each resample (with
+#'   `partial = TRUE`, each resample is partialled again). See the 'Bootstrap'
+#'   section. Not available for Bayesian, full Bayesian partial
+#'   (`partial_bayesian`), or multilevel correlations; the interval and p-value
+#'   are two-sided, so `alternative` (passed through `...`) must be
+#'   `"two.sided"`, the default.
 #' @param iterations Number of bootstrap resamples (default `1000`). Only used
 #'   when `bootstrap = TRUE` or `cluster` is given.
 #' @param cluster Name of a column in `data` identifying clusters of rows
@@ -249,7 +249,7 @@ cor_test <- function(
         )
       }
       # rows with a missing cluster value cannot be resampled: drop them
-      # here so the estimate, `n_Obs`, and the interval all leave them out
+      # here so the estimate, `n_Obs`, and the interval use the same rows
       data <- data[!is.na(data[[cluster]]), , drop = FALSE]
     }
   }
@@ -273,10 +273,8 @@ cor_test <- function(
     data[c(x, y)] <- datawizard::to_factor(data[c(x, y)])
   }
 
-  # the clusters with a row that enters the coefficient (counted after the
-  # conversions above, which decide whether x and y are partialled); with
-  # `partial`, the bootstrap also resamples clusters whose rows enter only a
-  # regression, but those supply no pair of values
+  # count the clusters with a row that enters the coefficient (after the
+  # conversions above)
   if (bootstrap && !is.null(cluster)) {
     counted <- if (isTRUE(partial)) {
       .partial_rows(data, x, y, cluster)$coefficient
@@ -309,8 +307,8 @@ cor_test <- function(
     winsorize <- 0.2
   }
 
-  # Partial, winsorize, rank transform. A partial bootstrap re-runs this chain
-  # on each resample of the rows as they are before it.
+  # Partial, winsorize, rank transform (repeated in each resample of a partial
+  # bootstrap)
   data_before_chain <- data
   data <- .cor_test_chain(
     data,
@@ -496,10 +494,7 @@ cor_test <- function(
 
 # Utilities ---------------------------------------------------------------
 
-# The transformations applied to x and y before the coefficient, in order:
-# partial (x and y each adjusted for every column other than x, y, and
-# `cluster`), winsorize, rank transform. `winsorize` is FALSE, NULL, or a
-# threshold.
+# Partial, winsorize, and rank transform x and y, in this order
 #' @keywords internal
 .cor_test_chain <- function(
   data,
@@ -515,7 +510,7 @@ cor_test <- function(
 ) {
   # Partial
   if (isTRUE(partial)) {
-    # the cluster column identifies resampling units and is never a covariate
+    # the cluster column is never a covariate
     covariates <- setdiff(names(data), cluster)
     data[[x]] <- .adjust_variable(
       data[setdiff(covariates, y)],
@@ -557,12 +552,8 @@ cor_test <- function(
   data
 }
 
-# The rows of the partial point estimate. A numeric x enters its regression
-# where x and the covariates are complete, and then has an adjusted value; a
-# non-numeric x is not adjusted and has a value where x is present (the same
-# for y). `coefficient`: rows with both values, which enter the coefficient.
-# `used`: rows that enter a regression or the coefficient. Other rows change
-# no estimate and are not resampled.
+# Rows of the partial point estimate: `coefficient` (rows with both values)
+# and `used` (rows that enter a regression or the coefficient)
 #' @keywords internal
 .partial_rows <- function(data, x, y, cluster = NULL) {
   columns <- setdiff(names(data), cluster)
@@ -584,17 +575,13 @@ cor_test <- function(
   )
 }
 
-# `var` adjusted for every other column of `data`, as in
-# `datawizard::adjust(data)[[var]]`, but fitting only the model for `var`
-# (the default `select = is.numeric` fits one model per numeric column). A
-# non-numeric `var` is returned unchanged, as `adjust()` leaves it.
+# As `datawizard::adjust(data)[[var]]`, but fitting only the model for `var`
 #' @keywords internal
 .adjust_variable <- function(data, var, multilevel = FALSE, bayesian = FALSE) {
   if (!is.numeric(data[[var]])) {
     return(data[[var]])
   }
-  # `select` is inlined as a string: `adjust()` reads a symbol passed to
-  # `select` as a column name, so `select = var` would pick a column `var`
+  # inline `var` as a string, so `select` does not pick a column named `var`
   eval(bquote(datawizard::adjust(
     data,
     select = .(var),

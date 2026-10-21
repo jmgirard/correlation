@@ -1,9 +1,7 @@
 # Bootstrap intervals for partial correlations --------------------------------
 #
-# Each replicate takes the resampled raw rows and runs the chain of the point
-# estimate: partial (x and y each regressed on every column other than x, y,
-# and the cluster column), then winsorize, then rank transform, then the
-# coefficient.
+# Each replicate partials the resampled rows again, then winsorizes and rank
+# transforms them, as for the point estimate.
 #
 # Populations:
 # - sim_partial(n): z1, z2, z3 ~ iid N(0, 1); x = 0.5 z1 + 0.3 z2 + e,
@@ -42,9 +40,9 @@ sim_partial_cluster <- function(n_clusters = 50, size = 12) {
 
 covers <- function(rez, value) rez$CI_low <= value && value <= rez$CI_high
 
-# AC1: plain bootstrap ---------------------------------------------------------
+# plain bootstrap --------------------------------------------------------------
 
-test_that("AC1: plain bootstrap covers the partial correlation 0.4 at n = 50", {
+test_that("plain bootstrap covers the partial correlation 0.4 at n = 50", {
   skip_on_cran()
   set.seed(2026)
   hits <- vapply(
@@ -68,7 +66,7 @@ test_that("AC1: plain bootstrap covers the partial correlation 0.4 at n = 50", {
   expect_lte(mean(hits), 0.99)
 })
 
-test_that("AC1: bootstrap endpoints match the analytic endpoints at n = 2000", {
+test_that("bootstrap endpoints match the analytic endpoints at n = 2000", {
   skip_on_cran()
   set.seed(11)
   d <- sim_partial(2000)
@@ -87,9 +85,9 @@ test_that("AC1: bootstrap endpoints match the analytic endpoints at n = 2000", {
   expect_lt(abs(boot$CI_high - analytic$CI_high), 0.006)
 })
 
-# AC2: cluster bootstrap -------------------------------------------------------
+# cluster bootstrap ------------------------------------------------------------
 
-test_that("AC2: cluster bootstrap covers the partial correlation 0.5", {
+test_that("cluster bootstrap covers the partial correlation 0.5", {
   skip_on_cran()
   set.seed(31)
   hits <- vapply(
@@ -115,9 +113,9 @@ test_that("AC2: cluster bootstrap covers the partial correlation 0.5", {
   expect_lt(mean(hits[2, ]), 0.85)
 })
 
-# AC3: the cluster column is never a covariate ---------------------------------
+# the cluster column is never a covariate --------------------------------------
 
-test_that("AC3: the cluster column does not change the partial coefficient", {
+test_that("the cluster column does not change the partial coefficient", {
   set.seed(41)
   d <- sim_partial_cluster()
   no_id <- cor_test(d[c("x", "y", "z")], "x", "y", partial = TRUE)
@@ -145,7 +143,7 @@ test_that("AC3: the cluster column does not change the partial coefficient", {
   expect_gt(abs(with_id$r - no_id$r), 1e-6)
 })
 
-test_that("AC3: cluster = row number reproduces the plain partial bootstrap", {
+test_that("cluster = row number reproduces the plain partial bootstrap", {
   set.seed(42)
   d <- sim_partial(60)
   d$id <- seq_len(nrow(d))
@@ -173,7 +171,7 @@ test_that("AC3: cluster = row number reproduces the plain partial bootstrap", {
   )
 })
 
-# AC4: chain order inside a replicate --------------------------------------------
+# order of steps inside a replicate ---------------------------------------------
 
 # the first resample of a cluster bootstrap, rebuilt by hand, then partialled
 # with lm() residuals and transformed by `transform`
@@ -189,7 +187,7 @@ first_replicate_by_hand <- function(d, seed, transform) {
   cor_test(transform(rebuilt), "x", "y")$r
 }
 
-test_that("AC4: each replicate partials, then winsorizes or rank transforms", {
+test_that("each replicate partials, then winsorizes or rank transforms", {
   set.seed(51)
   d <- sim_partial_cluster(n_clusters = 25, size = 8)
   # heavy tails so that winsorizing and ranking change the coefficient
@@ -295,9 +293,9 @@ test_that("each replicate re-partials instead of resampling fixed residuals", {
   expect_equal(boot$r, cor(fixed$x, fixed$y), tolerance = 1e-12)
 })
 
-# AC5: still refused ----------------------------------------------------------------
+# still refused ----------------------------------------------------------------
 
-test_that("AC5: bootstrap is refused for full Bayesian partial and multilevel", {
+test_that("bootstrap is refused for full Bayesian partial and multilevel", {
   d <- sim_partial(30)
   expect_error(
     cor_test(d, "x", "y", bootstrap = TRUE, partial_bayesian = TRUE),
@@ -314,9 +312,9 @@ test_that("AC5: bootstrap is refused for full Bayesian partial and multilevel", 
   )
 })
 
-# AC6: correlation() -------------------------------------------------------------
+# correlation() ----------------------------------------------------------------
 
-test_that("AC6: correlation() runs the partial cluster bootstrap for each pair", {
+test_that("correlation() runs the partial cluster bootstrap for each pair", {
   set.seed(71)
   d <- sim_partial_cluster(n_clusters = 30, size = 6)
   d$w <- d$z + stats::rnorm(nrow(d))
@@ -354,7 +352,7 @@ test_that("AC6: correlation() runs the partial cluster bootstrap for each pair",
   expect_identical(attr(plain, "ci_method"), "bootstrap")
 })
 
-test_that("AC5: correlation() refuses the bootstrap with partial_bayesian", {
+test_that("correlation() refuses the bootstrap with partial_bayesian", {
   d <- sim_partial(30)
   expect_error(
     correlation(d, partial = TRUE, partial_bayesian = TRUE, bootstrap = TRUE),
